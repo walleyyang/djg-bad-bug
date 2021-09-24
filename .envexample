@@ -1,3 +1,3 @@
-QUACKING_DUCK=http://duckduckgo.com
-QUACKING_DUCK_USERNAME=user
-QUACKING_DUCK_PASSWORD=password
+BAD_BUG=https://duckduckgo.com
+BAD_BUG_USERNAME=user
+BAD_BUG_PASSWORD=password

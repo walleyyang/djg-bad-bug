@@ -1,0 +1,4 @@
+node_modules
+npm-debug.log
+# Should mount and include if you want this
+.env

@@ -1,5 +1,5 @@
 {
-  "name": "quacking-duck",
+  "name": "bad-bug",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -8,14 +8,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/walleyyang/quacking-duck.git"
+    "url": "git+https://github.com/walleyyang/bad-bug.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/walleyyang/quacking-duck/issues"
+    "url": "https://github.com/walleyyang/bad-bug/issues"
   },
-  "homepage": "https://github.com/walleyyang/quacking-duck#readme",
+  "homepage": "https://github.com/walleyyang/bad-bug#readme",
   "dependencies": {
     "dotenv": "^10.0.0",
     "puppeteer": "^10.4.0"
