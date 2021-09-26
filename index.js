@@ -4,8 +4,14 @@ const puppeteer = require('puppeteer');
 
 (async () => {
   try {
+    // Get this working inside a container with args
     const browser = await puppeteer.launch({
-      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+      args: [
+        '--disable-gpu',
+        '--disable-dev-shm-usage',
+        '--disable-setuid-sandbox',
+        '--no-sandbox',
+      ],
     });
     const page = await browser.newPage();
 
@@ -17,6 +23,7 @@ const puppeteer = require('puppeteer');
     //   page.waitForNavigation(),
     //   page.click('#loginform > div:nth-child(6) > div > button'),
     // ]);
+    // await page.screenshot({ path: './images/example.png' });
 
     // await page.waitForSelector('#menuItemOptions', { timeout: 1000 });
     await page.click('#menuItemOptions');
@@ -32,16 +39,14 @@ const puppeteer = require('puppeteer');
       console.log(addedValues);
     });
 
-    // await page.screenshot({ path: 'example.png' });
-
     await page.evaluate(() => {
       const target = document.querySelector('#optionsBody');
 
       const observer = new MutationObserver((mutations) => {
         for (const mutation of mutations) {
           if (mutation.type === 'childList') {
-            // puppeteerMutation(mutation.addedNodes[0].textContent);
-            mutation.addedNodes[0].textContent;
+            puppeteerMutation(mutation.addedNodes[0].textContent);
+            // mutation.addedNodes[0].textContent;
           }
         }
       });
