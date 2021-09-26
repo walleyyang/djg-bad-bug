@@ -1,3 +1,8 @@
 BAD_BUG=https://duckduckgo.com
 BAD_BUG_USERNAME=user
 BAD_BUG_PASSWORD=password
+
+OWL_FILTER=helloworld
+OWL_FILTERS=helloworld
+OWL_FILTER_AA=helloworld
+OWL_FILTER_AAA=helloworld

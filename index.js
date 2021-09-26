@@ -27,12 +27,10 @@ const puppeteer = require('puppeteer');
 
     // await page.waitForSelector('#menuItemOptions', { timeout: 1000 });
     await page.click('#menuItemOptions');
-    // await page.click('#optionsFilter');
-    // await page.click('#chkOptionsFlowAA');
-    // await page.click('#chkOptionsFlowAAA');
-    // await page.click(
-    //   '#optionsFlowFilters > div > div > div.modal-footer > button:nth-child(1)'
-    // );
+    // await page.click(process.env.OWL_FILTER);
+    // await page.click(process.env.OWL_FILTER_AA);
+    // await page.click(process.env.OWL_FILTER_AAA);
+    // await page.click(process.env.OWL_FILTERS);
 
     await page.exposeFunction('puppeteerMutation', (addedValues) => {
       // console.log(addedValues.split('\n'));
