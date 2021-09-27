@@ -1,9 +1,12 @@
 require('dotenv').config();
 
+const WebSocket = require('ws');
 const puppeteer = require('puppeteer');
 
 (async () => {
   try {
+    const client = new WebSocket('ws://localhost:8080');
+
     // Get this working inside a container with args
     const browser = await puppeteer.launch({
       args: [
@@ -23,7 +26,6 @@ const puppeteer = require('puppeteer');
     //   page.waitForNavigation(),
     //   page.click('#loginform > div:nth-child(6) > div > button'),
     // ]);
-    // await page.screenshot({ path: './images/example.png' });
 
     // await page.waitForSelector('#menuItemOptions', { timeout: 1000 });
     await page.click('#menuItemOptions');
@@ -35,6 +37,7 @@ const puppeteer = require('puppeteer');
     await page.exposeFunction('puppeteerMutation', (addedValues) => {
       // console.log(addedValues.split('\n'));
       console.log(addedValues);
+      client.send(addedValues);
     });
 
     await page.evaluate(() => {
@@ -44,7 +47,6 @@ const puppeteer = require('puppeteer');
         for (const mutation of mutations) {
           if (mutation.type === 'childList') {
             puppeteerMutation(mutation.addedNodes[0].textContent);
-            // mutation.addedNodes[0].textContent;
           }
         }
       });
