@@ -5,7 +5,9 @@ const puppeteer = require('puppeteer');
 
 (async () => {
   try {
-    const client = new WebSocket('ws://localhost:8080');
+    const client = new WebSocket(
+      `ws://${process.env.WEBSOCKET_URL}:${process.env.WEBSOCKET_PORT}`
+    );
 
     // Get this working inside a container with args
     const browser = await puppeteer.launch({
@@ -34,10 +36,21 @@ const puppeteer = require('puppeteer');
     // await page.click(process.env.OWL_FILTER_AAA);
     // await page.click(process.env.OWL_FILTERS);
 
-    await page.exposeFunction('puppeteerMutation', (addedValues) => {
-      // console.log(addedValues.split('\n'));
-      console.log(addedValues);
-      client.send(addedValues);
+    await page.exposeFunction('puppeteerMutation', (rawData) => {
+      const filteredData = rawData.replace(/\t/g, ' ').split(' ');
+      const data = JSON.stringify({
+        time: filteredData[0],
+        symbol: filteredData[1],
+        expiration: filteredData[2],
+        strike: filteredData[3],
+        position: filteredData[4],
+        stockPrice: filteredData[5],
+        details: filteredData[6],
+        type: filteredData[7],
+        value: filteredData[8],
+      });
+
+      client.send(data);
     });
 
     await page.evaluate(() => {
@@ -45,8 +58,8 @@ const puppeteer = require('puppeteer');
 
       const observer = new MutationObserver((mutations) => {
         for (const mutation of mutations) {
-          if (mutation.type === 'childList') {
-            puppeteerMutation(mutation.addedNodes[0].textContent);
+          if (mutation.addedNodes.length) {
+            puppeteerMutation(mutation.addedNodes[0].innerText);
           }
         }
       });
@@ -55,6 +68,7 @@ const puppeteer = require('puppeteer');
         childList: true,
       });
 
+      // TODO: Maybe...
       // start at x time set timer 23460 secs
       // await browser.close();
     });
