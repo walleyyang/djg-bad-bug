@@ -41,7 +41,6 @@ class DataModifier {
   };
 
   verifyData = (data) => {
-    const minDataLength = 11;
     const dataKeys = [
       'time',
       'symbol',
@@ -56,6 +55,7 @@ class DataModifier {
       'goldenSweep',
     ];
 
+    const minDataLength = dataKeys.length;
     let validData = true;
 
     if (
