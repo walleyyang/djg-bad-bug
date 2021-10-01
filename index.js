@@ -44,9 +44,8 @@ const DataModifier = require('./DataModifier');
 
       if (filteredDataValid) {
         const dataJsonString = dataModifier.getJsonString(filteredData);
-        const data = dataModifier.getJsonObject(dataJsonString);
 
-        if (dataModifier.verifyData(data) && dataModifier.verifyFilter(data)) {
+        if (dataModifier.isValidData(JSON.parse(dataJsonString))) {
           client.send(dataJsonString);
         }
       }
