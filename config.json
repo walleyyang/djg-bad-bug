@@ -3,6 +3,10 @@
 		"flow": "FLOW",
 		"alert": "ALERT"
 	},
+	"sentiment": {
+		"bullish": "BULLISH",
+		"bearish": "BEARISH"
+	},
 	"minValue": 50000,
 	"minLargeValueFlowStockValue": 250000,
 	"minGoldenSweepValue": 1000000,

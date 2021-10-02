@@ -9,7 +9,7 @@ class AlertDataModifier {
       expiration: initialFilteredData[2],
       strike: initialFilteredData[3],
       position: initialFilteredData[4],
-      sentiment: initialFilteredData[5],
+      sentiment: initialFilteredData[5].split('_')[1],
       alertPrice: initialFilteredData[6],
     });
   };

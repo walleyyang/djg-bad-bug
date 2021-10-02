@@ -68,8 +68,8 @@ class FlowDataModifier {
   getSentiment = (position, details) => {
     const letters = details.split(' ')[1];
     const verifyLetter = 'A';
-    const bullish = 'BULLISH';
-    const bearish = 'BEARISH';
+    const bullish = Config.sentiment['bullish'];
+    const bearish = Config.sentiment['bearish'];
     let sentiment = '';
 
     if (position === 'CALL') {

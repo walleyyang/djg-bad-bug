@@ -6,6 +6,8 @@ const puppeteer = require('puppeteer');
 const FlowDataModifier = require('./FlowDataModifier');
 const AlertDataModifier = require('./AlertDataModifier');
 
+const Config = require('./config.json');
+
 const owlFlow = process.env.OWL_FLOW;
 const owlAlert = process.env.OWL_ALERT;
 
@@ -45,12 +47,14 @@ const owlAlert = process.env.OWL_ALERT;
     await page.click(process.env.OWL_FILTERS);
 
     await page.exposeFunction('puppeteerMutation', (rawData) => {
-      const initialFilteredData = rawData.split('\n');
+      const rawDataUpper = rawData.toUpperCase();
+      const initialFilteredData = rawDataUpper.split('\n');
       const filteredDataValid = initialFilteredData.length > 1;
 
       if (filteredDataValid) {
         const data =
-          rawData.includes('Bullish') || rawData.includes('Bearish')
+          rawDataUpper.includes(Config.sentiment['bullish']) ||
+          rawDataUpper.includes(Config.sentiment['bearish'])
             ? getAlertData(alertDataModifier, initialFilteredData)
             : getFlowData(flowDataModifier, initialFilteredData);
 
