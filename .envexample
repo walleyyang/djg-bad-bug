@@ -5,6 +5,10 @@ BAD_BUG_PASSWORD=password
 WEBSOCKET_URL=localhost
 WEBSOCKET_PORT=123
 
+OWL_FLOW=helloworld
+OWL_ALERT=helloworld
+
+# Filters
 OWL_FILTER=helloworld
 OWL_FILTERS=helloworld
 OWL_FILTER_AA=helloworld

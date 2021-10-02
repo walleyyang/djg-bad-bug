@@ -3,12 +3,17 @@ require('dotenv').config();
 const WebSocket = require('ws');
 const puppeteer = require('puppeteer');
 
-const DataModifier = require('./DataModifier');
+const FlowDataModifier = require('./FlowDataModifier');
+const AlertDataModifier = require('./AlertDataModifier');
+
+const owlFlow = process.env.OWL_FLOW;
+const owlAlert = process.env.OWL_ALERT;
 
 (async () => {
   try {
-    const dataModifier = new DataModifier();
-    const client = new WebSocket(
+    const flowDataModifier = new FlowDataModifier();
+    const alertDataModifier = new AlertDataModifier();
+    const websocketClient = new WebSocket(
       `ws://${process.env.WEBSOCKET_URL}:${process.env.WEBSOCKET_PORT}`
     );
 
@@ -34,44 +39,68 @@ const DataModifier = require('./DataModifier');
 
     await page.click('#menuItemOptions');
     await page.click(process.env.OWL_FILTER);
+    await page.waitForTimeout(3000);
     await page.click(process.env.OWL_FILTER_AA);
     await page.click(process.env.OWL_FILTER_AAA);
     await page.click(process.env.OWL_FILTERS);
 
     await page.exposeFunction('puppeteerMutation', (rawData) => {
-      const filteredData = rawData.split('\n');
-      const filteredDataValid = filteredData.length > 1;
+      const initialFilteredData = rawData.split('\n');
+      const filteredDataValid = initialFilteredData.length > 1;
 
       if (filteredDataValid) {
-        const dataJsonString = dataModifier.getJsonString(filteredData);
+        const data =
+          rawData.includes('Bullish') || rawData.includes('Bearish')
+            ? getAlertData(alertDataModifier, initialFilteredData)
+            : getFlowData(flowDataModifier, initialFilteredData);
 
-        if (dataModifier.isValidData(JSON.parse(dataJsonString))) {
-          client.send(dataJsonString);
+        if (data !== null) {
+          websocketClient.send(data);
         }
       }
     });
 
-    await page.evaluate(() => {
-      const target = document.querySelector('#optionsBody');
+    await page.evaluate(
+      ({ owlFlow, owlAlert }) => {
+        const flowTarget = document.querySelector(owlFlow);
+        const alertTarget = document.querySelector(owlAlert);
 
-      const observer = new MutationObserver((mutations) => {
-        for (const mutation of mutations) {
-          if (mutation.addedNodes.length) {
-            puppeteerMutation(mutation.addedNodes[0].innerText);
+        const observer = new MutationObserver((mutations) => {
+          for (const mutation of mutations) {
+            if (mutation.addedNodes.length) {
+              puppeteerMutation(mutation.addedNodes[0].innerText);
+            }
           }
-        }
-      });
+        });
 
-      observer.observe(target, {
-        childList: true,
-      });
+        observer.observe(flowTarget, {
+          childList: true,
+        });
 
-      // TODO: Maybe...
-      // start at x time set timer 23460 secs
-      // await browser.close();
-    });
+        observer.observe(alertTarget, {
+          childList: true,
+        });
+
+        // TODO: Maybe...
+        // start at x time set timer 23460 secs
+        // await browser.close();
+      },
+      { owlFlow, owlAlert }
+    );
   } catch (err) {
     console.log('Error occured...');
     console.log(err);
   }
 })();
+
+getFlowData = (flowDataModifier, initialFilteredData) => {
+  const dataJsonString = flowDataModifier.getJsonString(initialFilteredData);
+
+  return flowDataModifier.isValidData(JSON.parse(dataJsonString))
+    ? dataJsonString
+    : null;
+};
+
+getAlertData = (alertDataModifier, initialFilteredData) => {
+  return alertDataModifier.getJsonString(initialFilteredData);
+};
