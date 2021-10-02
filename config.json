@@ -1,4 +1,8 @@
 {
+	"messageTypes": {
+		"flow": "FLOW",
+		"alert": "ALERT"
+	},
 	"minValue": 50000,
 	"minLargeValueFlowStockValue": 250000,
 	"minGoldenSweepValue": 1000000,
@@ -32,6 +36,7 @@
 		"BABA",
 		"DIS",
 		"DDOG",
+		"DKNG",
 		"FB",
 		"HOOD",
 		"JD",
@@ -40,12 +45,14 @@
 		"NFLX",
 		"NIO",
 		"NVDA",
+		"PENN",
 		"PLTR",
 		"PYPL",
 		"RBLX",
 		"ROKU",
 		"SPCE",
 		"TSLA",
+		"UPST",
 		"ZM"
 	]
 }

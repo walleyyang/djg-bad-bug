@@ -1,5 +1,6 @@
 const Config = require('./config.json');
-class DataModifier {
+
+class FlowDataModifier {
   largeValueFlowStocks = Config.largeValueFlowStocks;
   validStocks = Config.validStocks;
 
@@ -19,43 +20,45 @@ class DataModifier {
   maxGoldenSweepDayMilliseconds =
     Date.now() + this.maxGoldenSweepDayAsMilliseconds;
 
-  getJsonString = (filteredData) => {
-    const filteredDataSymbol = filteredData[1];
-    const filteredDataExpiration = filteredData[2];
-    const filteredDataPosition = filteredData[4];
-    const filteredDataDetails = filteredData[6].replace('_', ' ');
-    const filteredDataType = filteredData[7];
-    const filteredDataValue = filteredData[8];
-    const filteredDataEstimatedValue =
-      this.getEstimatedValue(filteredDataValue);
+  getJsonString = (initialFilteredData) => {
+    const initialFilteredDataSymbol = initialFilteredData[1];
+    const initialFilteredDataExpiration = initialFilteredData[2];
+    const initialFilteredDataPosition = initialFilteredData[4];
+    const initialFilteredDataDetails = initialFilteredData[6].replace('_', ' ');
+    const initialFilteredDataType = initialFilteredData[7];
+    const initialFilteredDataValue = initialFilteredData[8];
+    const initialFilteredDataEstimatedValue = this.getEstimatedValue(
+      initialFilteredDataValue
+    );
     const goldenSweepCheck = this.isGoldenSweep(
-      filteredDataEstimatedValue,
-      filteredDataType,
-      filteredDataExpiration
+      initialFilteredDataEstimatedValue,
+      initialFilteredDataType,
+      initialFilteredDataExpiration
     );
     const flowSentiment = this.getSentiment(
-      filteredDataPosition,
-      filteredDataDetails
+      initialFilteredDataPosition,
+      initialFilteredDataDetails
     );
     const validFilterCheck = this.isValidFilter(
-      filteredDataExpiration,
-      filteredDataEstimatedValue,
+      initialFilteredDataExpiration,
+      initialFilteredDataEstimatedValue,
       goldenSweepCheck,
-      filteredDataSymbol,
-      filteredDataType
+      initialFilteredDataSymbol,
+      initialFilteredDataType
     );
 
     return JSON.stringify({
-      time: filteredData[0],
-      symbol: filteredDataSymbol,
-      expiration: filteredDataExpiration,
-      strike: filteredData[3],
-      position: filteredDataPosition,
-      stockPrice: filteredData[5],
-      details: filteredDataDetails,
-      type: filteredDataType,
-      value: filteredDataValue,
-      estimatedValue: filteredDataEstimatedValue,
+      messageType: Config.messageTypes['flow'],
+      time: initialFilteredData[0],
+      symbol: initialFilteredDataSymbol,
+      expiration: initialFilteredDataExpiration,
+      strike: initialFilteredData[3],
+      position: initialFilteredDataPosition,
+      stockPrice: initialFilteredData[5],
+      details: initialFilteredDataDetails,
+      type: initialFilteredDataType,
+      value: initialFilteredDataValue,
+      estimatedValue: initialFilteredDataEstimatedValue,
       goldenSweep: goldenSweepCheck,
       sentiment: flowSentiment,
       validFilter: validFilterCheck,
@@ -158,4 +161,4 @@ class DataModifier {
   };
 }
 
-module.exports = DataModifier;
+module.exports = FlowDataModifier;
