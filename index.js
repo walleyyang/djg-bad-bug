@@ -11,63 +11,64 @@ const Config = require('./config.json');
 const owlFlow = process.env.OWL_FLOW;
 const owlAlert = process.env.OWL_ALERT;
 
+let websocketClient;
+let flowDataModifier;
+let alertDataModifier;
+
+// Get this working inside a container with args
+const puppeteerLaunchArgs = [
+  '--disable-gpu',
+  '--disable-dev-shm-usage',
+  '--disable-setuid-sandbox',
+  '--no-sandbox',
+];
+
 (async () => {
   try {
-    const flowDataModifier = new FlowDataModifier();
-    const alertDataModifier = new AlertDataModifier();
-    const websocketClient = new WebSocket(
+    websocketClient = new WebSocket(
       `ws://${process.env.WEBSOCKET_URL}:${process.env.WEBSOCKET_PORT}`
     );
+    flowDataModifier = new FlowDataModifier();
+    alertDataModifier = new AlertDataModifier();
+  } catch (err) {
+    console.log('Error occured...');
+    console.log(err);
+  }
+})();
 
-    // Get this working inside a container with args
+(async () => {
+  try {
     const browser = await puppeteer.launch({
-      args: [
-        '--disable-gpu',
-        '--disable-dev-shm-usage',
-        '--disable-setuid-sandbox',
-        '--no-sandbox',
-      ],
+      args: puppeteerLaunchArgs,
     });
     const page = await browser.newPage();
 
     await page.goto(process.env.BAD_BUG);
-    await page.type('#Email', process.env.BAD_BUG_USERNAME);
-    await page.type('#Password', process.env.BAD_BUG_PASSWORD);
 
-    await Promise.all([
-      page.waitForNavigation(),
-      page.click('#loginform > div:nth-child(6) > div > button'),
-    ]);
+    if (process.env.MODE === 'PROD') {
+      await page.type('#Email', process.env.BAD_BUG_USERNAME);
+      await page.type('#Password', process.env.BAD_BUG_PASSWORD);
 
-    await page.click('#menuItemOptions');
-    await page.click(process.env.OWL_FILTER);
-    await page.waitForTimeout(3000);
-    await page.click(process.env.OWL_FILTER_AA);
-    await page.click(process.env.OWL_FILTER_AAA);
-    await page.click(process.env.OWL_FILTERS);
+      await Promise.all([
+        page.waitForNavigation(),
+        page.click('#loginform > div:nth-child(6) > div > button'),
+      ]);
+
+      await page.click('#menuItemOptions');
+      await page.click(process.env.OWL_FILTER);
+      await page.waitForTimeout(3000);
+      await page.click(process.env.OWL_FILTER_AA);
+      await page.click(process.env.OWL_FILTER_AAA);
+      await page.click(process.env.OWL_FILTERS);
+    }
 
     await page.exposeFunction('puppeteerMutation', (rawData) => {
-      const rawDataUpper = rawData.toUpperCase();
-      const initialFilteredData = rawDataUpper.split('\n');
-      const filteredDataValid = initialFilteredData.length > 1;
-
-      if (filteredDataValid) {
-        const data =
-          rawDataUpper.includes(Config.sentiment['bullish']) ||
-          rawDataUpper.includes(Config.sentiment['bearish'])
-            ? getAlertData(alertDataModifier, initialFilteredData)
-            : getFlowData(flowDataModifier, initialFilteredData);
-
-        if (data !== null) {
-          websocketClient.send(data);
-        }
-      }
+      handleData(rawData);
     });
 
     await page.evaluate(
-      ({ owlFlow, owlAlert }) => {
+      ({ owlFlow }) => {
         const flowTarget = document.querySelector(owlFlow);
-        const alertTarget = document.querySelector(owlAlert);
 
         const observer = new MutationObserver((mutations) => {
           for (const mutation of mutations) {
@@ -80,22 +81,91 @@ const owlAlert = process.env.OWL_ALERT;
         observer.observe(flowTarget, {
           childList: true,
         });
-
-        observer.observe(alertTarget, {
-          childList: true,
-        });
-
-        // TODO: Maybe...
-        // start at x time set timer 23460 secs
-        // await browser.close();
       },
-      { owlFlow, owlAlert }
+      { owlFlow }
     );
   } catch (err) {
     console.log('Error occured...');
     console.log(err);
   }
 })();
+
+(async () => {
+  try {
+    const browser = await puppeteer.launch({
+      args: puppeteerLaunchArgs,
+    });
+    const page = await browser.newPage();
+
+    await page.goto(process.env.BAD_BUG_ALERTS);
+
+    if (process.env.MODE === 'PROD') {
+      await page.type('#Email', process.env.BAD_BUG_USERNAME);
+      await page.type('#Password', process.env.BAD_BUG_PASSWORD);
+
+      await Promise.all([
+        page.waitForNavigation(),
+        page.click('#loginform > div:nth-child(6) > div > button'),
+      ]);
+
+      await page.click('#menuItemOptions');
+      await page.waitForTimeout(3000);
+      await page.click(process.env.OWL_ALERT_BTN);
+    }
+
+    await page.exposeFunction('alertsData', (rawData) => {
+      handleData(rawData);
+    });
+
+    await page.evaluate(
+      ({ owlAlert }) => {
+        const alertTarget = document.querySelector(owlAlert);
+        const alerts = [];
+
+        // Had issues with mutation observer, browser tabs, and elements that updated with dynamic data.
+        setInterval(() => {
+          const alertsRawData = alertTarget.innerText.split('\n');
+
+          alertsRawData.forEach((alert) => {
+            if (!alerts.includes(alert)) {
+              alerts.push(alert);
+              alertsData(alert);
+            }
+          });
+        }, 1000);
+      },
+      { owlAlert }
+    );
+  } catch (err) {
+    console.log('Error occured...');
+    console.log(err);
+  }
+})();
+
+const handleData = (rawData) => {
+  const rawDataUpper = rawData.toUpperCase();
+  let initialFilterData = [];
+
+  if (process.env.MODE === 'PROD') {
+    initialFilteredData = rawDataUpper.split('\n');
+  } else {
+    initialFilteredData = rawDataUpper.replace(/\t/g, '\n').split('\n');
+  }
+
+  const filteredDataValid = initialFilteredData.length > 1;
+
+  if (filteredDataValid) {
+    const data =
+      rawData.includes('Bullish') || rawData.includes('Bearish')
+        ? getAlertData(alertDataModifier, initialFilteredData)
+        : getFlowData(flowDataModifier, initialFilteredData);
+
+    if (data !== null) {
+      console.log(data); // TODO: Remove, but lets keep this here for a bit
+      websocketClient.send(data);
+    }
+  }
+};
 
 getFlowData = (flowDataModifier, initialFilteredData) => {
   const dataJsonString = flowDataModifier.getJsonString(initialFilteredData);
