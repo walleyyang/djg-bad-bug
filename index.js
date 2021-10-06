@@ -96,6 +96,7 @@ const puppeteerLaunchArgs = [
       args: puppeteerLaunchArgs,
     });
     const page = await browser.newPage();
+    const alerts = [];
 
     await page.goto(process.env.BAD_BUG_ALERTS);
 
@@ -113,19 +114,22 @@ const puppeteerLaunchArgs = [
       await page.click(process.env.OWL_ALERT_BTN);
     }
 
-    await page.exposeFunction('alertsData', (rawData) => {
-      handleData(rawData);
+    await page.exposeFunction('alertsData', (formattedRawData) => {
+      formattedRawData.forEach((alert) => {
+        if (!alerts.includes(alert)) {
+          alerts.push(alert);
+          handleData(alert);
+        }
+      });
     });
 
     await page.evaluate(
       ({ owlAlert }) => {
         const alertTarget = document.querySelector(owlAlert);
-        const alerts = [];
 
         // Had issues with mutation observer, browser tabs, and elements that updated with dynamic data.
+        // So we will just check it every so often
         setInterval(() => {
-          // const alertsRawData = alertTarget.innerText.split('\n');
-
           // Body shows empty rows, but splitting it shows value for some reason
           const alertsRawData = alertTarget.innerHTML.split('</tr>');
           // Last row is div
@@ -141,7 +145,7 @@ const puppeteerLaunchArgs = [
 
           newTableString += tableEnd;
 
-          // Create a new table to append a new line so we can easily split the data
+          // Create a new table to append a new line so we can easily identify and split the data
           const html = new DOMParser().parseFromString(
             newTableString,
             'text/html'
@@ -164,13 +168,8 @@ const puppeteerLaunchArgs = [
             formattedRawData.push(formattedCell);
           });
 
-          // Finally... check if already included and process
-          formattedRawData.forEach((alert) => {
-            if (!alerts.includes(alert)) {
-              alerts.push(alert);
-              alertsData(alert);
-            }
-          });
+          // Finally have the formatted data we need
+          alertsData(formattedRawData);
         }, 1000);
       },
       { owlAlert }
@@ -200,7 +199,6 @@ const handleData = (rawData) => {
         : getFlowData(flowDataModifier, initialFilteredData);
 
     if (data !== null) {
-      console.log(data); // TODO: Remove, but lets keep this here for a bit
       websocketClient.send(data);
     }
   }
