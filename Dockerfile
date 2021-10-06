@@ -9,6 +9,13 @@ RUN apt-get update \
       --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
+# tzdata for timzone
+RUN apt-get update -y
+RUN apt-get install -y tzdata
+ 
+# timezone env with default
+ENV TZ America/New_York
+
 WORKDIR /app
 
 COPY . .
