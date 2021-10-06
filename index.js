@@ -124,9 +124,48 @@ const puppeteerLaunchArgs = [
 
         // Had issues with mutation observer, browser tabs, and elements that updated with dynamic data.
         setInterval(() => {
-          const alertsRawData = alertTarget.innerText.split('\n');
+          // const alertsRawData = alertTarget.innerText.split('\n');
+
+          // Body shows empty rows, but splitting it shows value for some reason
+          const alertsRawData = alertTarget.innerHTML.split('</tr>');
+          // Last row is div
+          alertsRawData.pop();
+
+          // Create a new table with rows that contains data
+          let newTableString = '<table><tbody>';
+          const tableEnd = '</tbody></table>';
 
           alertsRawData.forEach((alert) => {
+            newTableString += alert;
+          });
+
+          newTableString += tableEnd;
+
+          // Create a new table to append a new line so we can easily split the data
+          const html = new DOMParser().parseFromString(
+            newTableString,
+            'text/html'
+          );
+
+          const newTableBody = html.getElementsByTagName('tbody')[0];
+          const formattedRawData = [];
+
+          newTableBody.childNodes.forEach((row) => {
+            let formattedCell = '';
+
+            row.childNodes.forEach((cell, idx, array) => {
+              if (idx === array.length - 1) {
+                formattedCell += cell.innerText;
+              } else {
+                formattedCell += cell.innerText + '\n';
+              }
+            });
+
+            formattedRawData.push(formattedCell);
+          });
+
+          // Finally... check if already included and process
+          formattedRawData.forEach((alert) => {
             if (!alerts.includes(alert)) {
               alerts.push(alert);
               alertsData(alert);
@@ -144,7 +183,7 @@ const puppeteerLaunchArgs = [
 
 const handleData = (rawData) => {
   const rawDataUpper = rawData.toUpperCase();
-  let initialFilterData = [];
+  let initialFilteredData = [];
 
   if (process.env.MODE === 'PROD') {
     initialFilteredData = rawDataUpper.split('\n');
