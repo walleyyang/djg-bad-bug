@@ -36,6 +36,7 @@ const puppeteerLaunchArgs = [
   }
 })();
 
+// Flow
 (async () => {
   try {
     const browser = await puppeteer.launch({
@@ -90,6 +91,7 @@ const puppeteerLaunchArgs = [
   }
 })();
 
+// Alerts
 (async () => {
   try {
     const browser = await puppeteer.launch({
@@ -115,10 +117,15 @@ const puppeteerLaunchArgs = [
     }
 
     await page.exposeFunction('alertsData', (formattedRawData) => {
+      const alertIdIndex = 10;
+
       formattedRawData.forEach((alert) => {
-        if (!alerts.includes(alert)) {
-          alerts.push(alert);
-          handleData(alert);
+        const data = splitData(alert);
+
+        // Make sure we are not already keeping track of the id
+        if (!alerts.includes(data[alertIdIndex])) {
+          alerts.push(data[alertIdIndex]);
+          handleData(data);
         }
       });
     });
@@ -155,11 +162,12 @@ const puppeteerLaunchArgs = [
           const formattedRawData = [];
 
           newTableBody.childNodes.forEach((row) => {
+            const id = row.getAttribute('d-symbol');
             let formattedCell = '';
 
             row.childNodes.forEach((cell, idx, array) => {
               if (idx === array.length - 1) {
-                formattedCell += cell.innerText;
+                formattedCell += cell.innerText + '\n' + id;
               } else {
                 formattedCell += cell.innerText + '\n';
               }
@@ -180,23 +188,28 @@ const puppeteerLaunchArgs = [
   }
 })();
 
-const handleData = (rawData) => {
+const splitData = (rawData) => {
   const rawDataUpper = rawData.toUpperCase();
-  let initialFilteredData = [];
+  let splitData = [];
 
   if (process.env.MODE === 'PROD') {
-    initialFilteredData = rawDataUpper.split('\n');
+    splitData = rawDataUpper.split('\n');
   } else {
-    initialFilteredData = rawDataUpper.replace(/\t/g, '\n').split('\n');
+    splitData = rawDataUpper.replace(/\t/g, '\n').split('\n');
   }
 
-  const filteredDataValid = initialFilteredData.length > 1;
+  return splitData;
+};
 
-  if (filteredDataValid) {
+const handleData = (splitData) => {
+  const alertSentimentIndex = 5;
+
+  if (splitData.length > 1) {
     const data =
-      rawData.includes('Bullish') || rawData.includes('Bearish')
-        ? getAlertData(alertDataModifier, initialFilteredData)
-        : getFlowData(flowDataModifier, initialFilteredData);
+      splitData[alertSentimentIndex].includes('BULLISH') ||
+      splitData[alertSentimentIndex].includes('BEARISH')
+        ? getAlertData(alertDataModifier, splitData)
+        : getFlowData(flowDataModifier, splitData);
 
     if (data !== null) {
       websocketClient.send(data);
@@ -204,14 +217,14 @@ const handleData = (rawData) => {
   }
 };
 
-getFlowData = (flowDataModifier, initialFilteredData) => {
-  const dataJsonString = flowDataModifier.getJsonString(initialFilteredData);
+const getFlowData = (flowDataModifier, splitData) => {
+  const dataJsonString = flowDataModifier.getJsonString(splitData);
 
   return flowDataModifier.isValidData(JSON.parse(dataJsonString))
     ? dataJsonString
     : null;
 };
 
-getAlertData = (alertDataModifier, initialFilteredData) => {
-  return alertDataModifier.getJsonString(initialFilteredData);
+const getAlertData = (alertDataModifier, splitData) => {
+  return alertDataModifier.getJsonString(splitData);
 };
