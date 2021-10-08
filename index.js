@@ -64,7 +64,7 @@ const puppeteerLaunchArgs = [
     }
 
     await page.exposeFunction('puppeteerMutation', (rawData) => {
-      handleData(rawData);
+      handleData(splitData(rawData));
     });
 
     await page.evaluate(
