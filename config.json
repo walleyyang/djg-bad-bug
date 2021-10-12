@@ -7,6 +7,10 @@
 		"bullish": "BULLISH",
 		"bearish": "BEARISH"
 	},
+	"position": {
+		"call": "CALL",
+		"put": "PUT"
+	},
 	"minValue": 50000,
 	"minLargeValueFlowStockValue": 250000,
 	"minGoldenSweepValue": 1000000,
