@@ -73,9 +73,15 @@ class FlowDataModifier {
     let sentiment = '';
 
     if (position === 'CALL') {
-      sentiment = letters.includes(verifyLetter) ? bullish : bearish;
+      sentiment =
+        letters === undefined || letters.includes(verifyLetter)
+          ? bullish
+          : bearish;
     } else {
-      sentiment = letters.includes(verifyLetter) ? bearish : bullish;
+      sentiment =
+        letters === undefined || letters.includes(verifyLetter)
+          ? bearish
+          : bullish;
     }
 
     return sentiment;
