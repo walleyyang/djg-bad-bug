@@ -69,14 +69,20 @@ class FlowDataModifier {
   getSentiment = (position, details) => {
     const letters = details.split(' ')[1];
     const verifyLetter = 'A';
-    const bullish = Config.sentiment['bullish'];
-    const bearish = Config.sentiment['bearish'];
+    const bullish = Config.sentiment.bullish;
+    const bearish = Config.sentimentbearish;
     let sentiment = '';
 
     if (position === this.call) {
-      sentiment = letters.includes(verifyLetter) ? bullish : bearish;
+      sentiment =
+        letters === undefined || letters.includes(verifyLetter)
+          ? bullish
+          : bearish;
     } else {
-      sentiment = letters.includes(verifyLetter) ? bearish : bullish;
+      sentiment =
+        letters === undefined || letters.includes(verifyLetter)
+          ? bearish
+          : bullish;
     }
 
     return sentiment;
