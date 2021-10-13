@@ -8,6 +8,8 @@ class Database {
   collection = process.env.MONGO_COLLECTION;
   call = Config.position.call;
   put = Config.position.put;
+  bullish = Config.sentiment.bullish;
+  bearish = Config.sentiment.bearish;
 
   connect = async () => {
     const username = process.env.MONGO_INITDB_ROOT_USERNAME;
@@ -93,13 +95,28 @@ class Database {
   };
 
   getNewStrike = (data) => {
+    let callsValue = 0;
+    let putsValue = 0;
+
+    // Assume calls at bid and below bid are bearish and add them to putsValue
+    if (data.position === this.call) {
+      data.sentiment === this.bullish
+        ? (callsValue = parseInt(data.estimatedValue))
+        : (putsValue = parseInt(data.estimatedValue));
+    }
+
+    // Assume puts at bid and below bid are bullish and add them to callsValue
+    if (data.position === this.put) {
+      data.sentiment === this.bearish
+        ? (putsValue = parseInt(data.estimatedValue))
+        : (callsValue = parseInt(data.estimatedValue));
+    }
+
     return JSON.parse(
       JSON.stringify({
-        strike: data.strike,
-        callsValue:
-          data.position === this.call ? parseInt(data.estimatedValue) : 0,
-        putsValue:
-          data.position === this.put ? parseInt(data.estimatedValue) : 0,
+        strike: parseInt(data.strike),
+        callsValue: callsValue,
+        putsValue: putsValue,
       })
     );
   };
