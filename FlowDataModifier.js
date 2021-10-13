@@ -3,6 +3,7 @@ const Config = require('./config.json');
 class FlowDataModifier {
   largeValueFlowStocks = Config.largeValueFlowStocks;
   validStocks = Config.validStocks;
+  call = Config.position.call;
 
   minValue = Config.minValue;
   minLargeValueFlowStockValue = Config.minLargeValueFlowStockValue;
@@ -68,11 +69,11 @@ class FlowDataModifier {
   getSentiment = (position, details) => {
     const letters = details.split(' ')[1];
     const verifyLetter = 'A';
-    const bullish = Config.sentiment['bullish'];
-    const bearish = Config.sentiment['bearish'];
+    const bullish = Config.sentiment.bullish;
+    const bearish = Config.sentiment.bearish;
     let sentiment = '';
 
-    if (position === 'CALL') {
+    if (position === this.call) {
       sentiment =
         letters === undefined || letters.includes(verifyLetter)
           ? bullish
