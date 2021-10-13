@@ -70,7 +70,7 @@ class FlowDataModifier {
     const letters = details.split(' ')[1];
     const verifyLetter = 'A';
     const bullish = Config.sentiment.bullish;
-    const bearish = Config.sentimentbearish;
+    const bearish = Config.sentiment.bearish;
     let sentiment = '';
 
     if (position === this.call) {
