@@ -61,14 +61,25 @@ class Database {
 
   getUpdatedStrikes = (data, strikes) => {
     const position = data.position;
+    const sentiment = data.sentiment;
     const estimatedValue = data.estimatedValue;
     const strike = data.strike;
 
     for (let s of strikes) {
       if (s.strike === strike) {
-        position === this.call
-          ? (s.callsValue += parseInt(estimatedValue))
-          : (s.putsValue += parseInt(estimatedValue));
+        // Assume calls at bid and below bid are bearish and add them to putsValue
+        if (position === this.call) {
+          sentiment === this.bullish
+            ? (s.callsValue += parseInt(estimatedValue))
+            : (s.putsValue += parseInt(estimatedValue));
+        }
+
+        // Assume puts at bid and below bid are bullish and add them to callsValue
+        if (position === this.put) {
+          sentiment === this.bearish
+            ? (s.putsValue += parseInt(estimatedValue))
+            : (s.callsValue += parseInt(estimatedValue));
+        }
       }
     }
 
@@ -85,7 +96,9 @@ class Database {
       updatedStrikes.push(this.getNewStrike(data));
     }
 
-    return updatedStrikes;
+    return updatedStrikes.sort((a, b) =>
+      parseInt(a.strike) < parseInt(b.strike) ? 1 : -1
+    );
   };
 
   getUpdatedFlow = (data, flow) => {
@@ -114,7 +127,7 @@ class Database {
 
     return JSON.parse(
       JSON.stringify({
-        strike: parseInt(data.strike),
+        strike: data.strike,
         callsValue: callsValue,
         putsValue: putsValue,
       })
