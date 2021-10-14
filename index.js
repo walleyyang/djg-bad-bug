@@ -1,12 +1,13 @@
-require('dotenv').config();
-
 const WebSocket = require('ws');
 const puppeteer = require('puppeteer');
 
 const FlowDataModifier = require('./FlowDataModifier');
 const AlertDataModifier = require('./AlertDataModifier');
+const Database = require('./Database');
 
 const Config = require('./config.json');
+
+require('dotenv').config();
 
 const owlFlow = process.env.OWL_FLOW;
 const owlAlert = process.env.OWL_ALERT;
@@ -14,6 +15,7 @@ const owlAlert = process.env.OWL_ALERT;
 let websocketClient;
 let flowDataModifier;
 let alertDataModifier;
+let database;
 
 // Get this working inside a container with args
 const puppeteerLaunchArgs = [
@@ -30,6 +32,8 @@ const puppeteerLaunchArgs = [
     );
     flowDataModifier = new FlowDataModifier();
     alertDataModifier = new AlertDataModifier();
+    database = new Database();
+    database.connect();
   } catch (err) {
     console.log('Error occured...');
     console.log(err);
@@ -220,6 +224,10 @@ const handleData = (splitData) => {
 const getFlowData = (flowDataModifier, splitData) => {
   const dataJsonString = flowDataModifier.getJsonString(splitData);
 
+  // Insert all
+  database.insert(dataJsonString);
+
+  // Return only valid filtered data
   return flowDataModifier.isValidData(JSON.parse(dataJsonString))
     ? dataJsonString
     : null;

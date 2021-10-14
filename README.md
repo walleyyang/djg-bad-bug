@@ -6,6 +6,8 @@ You will need to create a `.env` file to connect to the correct website. See `.e
 
 Run `npm install` to install node modules.
 
+Run `docker compose up` for MongoDB.
+
 Run `npm start` to start locally.
 
 This uses the `prettier` formatter.
