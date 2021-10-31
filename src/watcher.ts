@@ -1,33 +1,36 @@
 import puppeteer from 'puppeteer';
+import 'dotenv/config';
 
-import config from 'config.json';
+import { modifier } from 'modifiers/modifier';
+import { sendMessage } from 'messageHandler';
+
+const production = 'PROD';
+const mode = process.env.MODE || '';
+const url = process.env.BAD_BUG || '';
+const username = process.env.BAD_BUG_USERNAME || '';
+const password = process.env.BAD_BUG_PASSWORD || '';
+
+const owlFlow = process.env.OWL_FLOW || '';
+const owlAlert = process.env.OWL_ALERT || '';
+const owlFilter = process.env.OWL_FILTER || '';
+const owlFilterAA = process.env.OWL_FILTER_AA || '';
+const owlFilterAAA = process.env.OWL_FILTER_AAA || '';
+const owlFilters = process.env.OWL_FILTERS || '';
+const timeout = 3000;
 
 const watcher = () => {
-  const production = 'PROD';
-  const mode = process.env.MODE || '';
-  const url = process.env.BAD_BUG || '';
-  const username = process.env.BAD_BUG_USERNAME || '';
-  const password = process.env.BAD_BUG_PASSWORD || '';
-
-  const owlFlow = process.env.OWL_FLOW || '';
-  const owlAlert = process.env.OWL_ALERT || '';
-  const owlFilter = process.env.OWL_FILTER || '';
-  const owlFilterAA = process.env.OWL_FILTER_AA || '';
-  const owlFilterAAA = process.env.OWL_FILTER_AAA || '';
-  const owlFilters = process.env.OWL_FILTERS || '';
-  const timeout = 3000;
-
   // Get this working inside a container with args
   const puppeteerLaunchArgs = ['--disable-gpu', '--disable-dev-shm-usage', '--disable-setuid-sandbox', '--no-sandbox'];
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const flowWatcher = (async () => {
     try {
-      console.log('trying flowWatcher....');
       const browser = await puppeteer.launch({
         args: puppeteerLaunchArgs,
       });
       const page = await browser.newPage();
 
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const puppeteerMutation = (rawData: string) => '';
 
       await page.goto(url);
@@ -47,8 +50,7 @@ const watcher = () => {
       }
 
       await page.exposeFunction('puppeteerMutation', (rawData: string) => {
-        console.log(rawData);
-        // handleData(splitData(rawData));
+        void sendMessage(modifier(rawData));
       });
 
       await page.evaluate(
@@ -69,40 +71,11 @@ const watcher = () => {
         },
         { owlFlow },
       );
-    } catch (err) {
-      console.log('Error occured...');
-      console.log(err);
+    } catch (error) {
+      console.log('DJG Bad Bug flow watch error: ');
+      console.log(error);
     }
   })();
 };
-
-// const splitData = (rawData: string) => {
-//   const rawDataUpper = rawData.toUpperCase();
-//   let splitData = [];
-
-//   if (process.env.MODE === 'PROD') {
-//     splitData = rawDataUpper.split('\n');
-//   } else {
-//     splitData = rawDataUpper.replace(/\t/g, '\n').split('\n');
-//   }
-
-//   return splitData;
-// };
-
-// const handleData = (splitData) => {
-//   const alertSentimentIndex = 5;
-
-//   if (splitData.length > 1) {
-//     const data =
-//       splitData[alertSentimentIndex].includes('BULLISH') || splitData[alertSentimentIndex].includes('BEARISH')
-//         ? getAlertData(alertDataModifier, splitData)
-//         : getFlowData(flowDataModifier, splitData);
-
-//     if (data !== null) {
-//       // console.log(data);
-//       // websocketClient.send(data);
-//     }
-//   }
-// };
 
 export { watcher };
