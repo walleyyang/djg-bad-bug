@@ -12,3 +12,7 @@ export enum Position {
   CALL = 'CALL',
   PUT = 'PUT',
 }
+
+export enum Environment {
+  PROD = 'PROD',
+}

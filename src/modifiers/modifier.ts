@@ -1,24 +1,24 @@
+import { Environment } from 'modifiers/enums';
 import { modifyFlow } from 'modifiers/flowModifier';
 
-const production = 'PROD';
 const mode = process.env.MODE || '';
 
-const modifier = (rawData: string) => {
-  return getData(splitData(rawData));
+const modifier = (data: string[]) => {
+  return getData(data);
 };
 
 // Split the initial raw data
 const splitData = (rawData: string) => {
   const rawDataUpper = rawData.toUpperCase();
-  let splitData = [];
+  let splittedData = [];
 
-  if (mode === production) {
-    splitData = rawDataUpper.split('\n');
+  if (mode === Environment.PROD) {
+    splittedData = rawDataUpper.split('\n');
   } else {
-    splitData = rawDataUpper.replace(/\t/g, '\n').split('\n');
+    splittedData = rawDataUpper.replace(/\t/g, '\n').split('\n');
   }
 
-  return splitData;
+  return splittedData;
 };
 
 const getData = (splittedData: string[]) => {
@@ -36,4 +36,4 @@ const getData = (splittedData: string[]) => {
   // }
 };
 
-export { modifier };
+export { modifier, splitData };

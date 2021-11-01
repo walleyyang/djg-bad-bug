@@ -7,17 +7,7 @@ const flowUrl = process.env.DATA_HANDLER_FLOW_URL || '';
 
 const sendMessage = async (message: Flow) => {
   try {
-    const options = {
-      url: flowUrl,
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json;charset=UTF-8',
-      },
-      data: message,
-    };
-
-    await axios(JSON.stringify(options));
+    await axios.post(flowUrl, message);
   } catch (error) {
     console.log('DJG Bad Bug send message error: ');
     console.log(error);

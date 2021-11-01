@@ -12,3 +12,14 @@ export interface Flow {
   estimatedValue: number;
   sentiment: string;
 }
+
+export interface Alert {
+  messageType: string;
+  symbol: string;
+  time: string;
+  expiration: string;
+  strike: number;
+  position: string;
+  sentiment: string;
+  alertPrice: number;
+}
