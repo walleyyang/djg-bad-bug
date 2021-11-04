@@ -12,3 +12,5 @@ export const owlFilterAA = process.env.OWL_FILTER_AA || '';
 export const owlFilterAAA = process.env.OWL_FILTER_AAA || '';
 export const owlFilters = process.env.OWL_FILTERS || '';
 export const timeout = 3000;
+
+export const launchArgs = ['--disable-gpu', '--disable-dev-shm-usage', '--disable-setuid-sandbox', '--no-sandbox'];

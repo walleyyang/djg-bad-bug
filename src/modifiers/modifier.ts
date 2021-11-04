@@ -1,10 +1,11 @@
-import { Environment } from 'modifiers/enums';
+import { Environment, MessageType } from 'modifiers/enums';
 import { modifyFlow } from 'modifiers/flowModifier';
+import { modifyAlert } from 'modifiers/alertModifier';
 
 const mode = process.env.MODE || '';
 
-const modifier = (data: string[]) => {
-  return getData(data);
+const modifier = (messageType: string, data: string[]) => {
+  return messageType === MessageType.FLOW ? modifyFlow(data) : modifyAlert(data);
 };
 
 // Split the initial raw data
@@ -18,22 +19,7 @@ const splitData = (rawData: string) => {
     splittedData = rawDataUpper.replace(/\t/g, '\n').split('\n');
   }
 
-  return splittedData;
-};
-
-const getData = (splittedData: string[]) => {
-  return modifyFlow(splittedData);
-  // const alertSentimentIndex = 5;
-  // if (splitData.length > 1) {
-  //   const data =
-  //     splitData[alertSentimentIndex].includes('BULLISH') || splitData[alertSentimentIndex].includes('BEARISH')
-  //       ? getAlertData(alertDataModifier, splitData)
-  //       : getFlowData(flowDataModifier, splitData);
-  //   if (data !== null) {
-  //     // console.log(data);
-  //     // websocketClient.send(data);
-  //   }
-  // }
+  return splittedData.map((data) => data.trim());
 };
 
 export { modifier, splitData };

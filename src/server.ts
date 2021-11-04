@@ -13,7 +13,7 @@ const createServer = () => {
     // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     console.log(`DJG Bad Bug listening on port: ${port}`);
 
-    // flowWatcher();
+    flowWatcher();
     alertWatcher();
   });
 };

@@ -1,29 +1,27 @@
 import puppeteer from 'puppeteer';
 import 'dotenv/config';
 
-import { modifier } from 'modifiers/modifier';
-import { Environment } from 'modifiers/enums';
+import { modifier, splitData } from 'modifiers/modifier';
+import { Environment, MessageType } from 'modifiers/enums';
 import { sendMessage } from 'messageHandler';
-import { mode, urlAlerts, username, password, owlAlert, owlAlertBtn, timeout } from 'watcherConstants';
+import { mode, urlAlerts, username, password, owlAlert, owlAlertBtn, timeout, launchArgs } from 'watcherConstants';
 
 const alertWatcher = () => {
   // Get this working inside a container with args
-  const puppeteerLaunchArgs = ['--disable-gpu', '--disable-dev-shm-usage', '--disable-setuid-sandbox', '--no-sandbox'];
+  const puppeteerLaunchArgs = launchArgs;
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const launcher = (async () => {
     try {
       const browser = await puppeteer.launch({
-        headless: false,
         args: puppeteerLaunchArgs,
       });
       const page = await browser.newPage();
 
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const puppeteerMutation = (rawData: string) => '';
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const getNewTableString = (alertTarget: HTMLElement) => '';
-      const alerts = [];
+      const puppeteerMutation = (rawData: string[]) => '';
+      // TODO: get initial persisted alerts
+      const alerts: string[] = [];
 
       await page.goto(urlAlerts);
 
@@ -39,34 +37,17 @@ const alertWatcher = () => {
       }
 
       await page.exposeFunction('puppeteerMutation', (rawData: string[]) => {
-        const alertIdIndex = 10;
+        const alertDataIdIndex = 10;
 
         rawData.forEach((alert) => {
-          // void sendMessage(modifier(rawData));
-          // const data = splitData(alert);
-          // // Make sure we are not already keeping track of the id
-          // if (!alerts.includes(data[alertIdIndex])) {
-          //   alerts.push(data[alertIdIndex]);
-          //   handleData(data);
-          // }
+          const data = splitData(alert);
+
+          // Make sure we are not already keeping track of the id
+          if (!alerts.includes(data[alertDataIdIndex])) {
+            alerts.push(data[alertDataIdIndex]);
+            void sendMessage(modifier(MessageType.ALERT, data));
+          }
         });
-      });
-
-      await page.exposeFunction('getNewTableString', (alertTarget: HTMLElement) => {
-        // Body shows empty rows, but splitting it shows value for some reason
-        const alertsRawData = alertTarget.innerHTML.split('</tr>');
-        // Last row is div
-        alertsRawData.pop();
-
-        // Create a new table with rows that contains data
-        let newTableString = '<table><tbody>';
-        const tableEnd = '</tbody></table>';
-
-        alertsRawData.forEach((alert) => {
-          newTableString += alert;
-        });
-
-        return (newTableString += tableEnd);
       });
 
       await page.evaluate(
@@ -76,9 +57,25 @@ const alertWatcher = () => {
           // Had issues with mutation observer, browser tabs, and elements that updated with dynamic data.
           // So we will just check it every so often
           setInterval(() => {
+            // Body shows empty rows, but splitting it shows value for some reason
+            const alertsRawData = alertTarget.innerHTML.split('</tr>');
+            // Last row is div
+            alertsRawData.pop();
+
+            // Create a new table with rows that contains data
+            let newTableString = '<table><tbody>';
+            const tableEnd = '</tbody></table>';
+
+            alertsRawData.forEach((alert) => {
+              newTableString += alert;
+            });
+
+            const tableString = (newTableString += tableEnd);
+
             // Create a new table to append a new line so we can easily identify and split the data
-            const html = new DOMParser().parseFromString(getNewTableString(alertTarget), 'text/html');
+            const html = new DOMParser().parseFromString(tableString, 'text/html');
             const newTableBody = html.getElementsByTagName('tbody')[0];
+
             const formattedRawData: string[] = [];
 
             newTableBody.childNodes.forEach((row) => {
@@ -97,7 +94,7 @@ const alertWatcher = () => {
             });
 
             // Finally have the formatted data we need
-            // puppeteerMutation(formattedRawData);
+            puppeteerMutation(formattedRawData);
           }, 1000);
         },
         { owlAlert },

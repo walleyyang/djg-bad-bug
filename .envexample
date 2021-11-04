@@ -1,11 +1,12 @@
+BAD_BUG_PORT=8084
+DATA_HANDLER_FLOW_URL=http://localhost:8082/flow
+DATA_HANDLER_ALERT_URL=http://localhost:8082/alert
+
 MODE=PROD
 BAD_BUG=https://duckduckgo.com
 BAD_BUG_ALERTS=https://duckduckgo.com
 BAD_BUG_USERNAME=user
 BAD_BUG_PASSWORD=password
-
-WEBSOCKET_URL=localhost
-WEBSOCKET_PORT=123
 
 OWL_FLOW='helloworld'
 OWL_ALERT='helloworld'
@@ -16,11 +17,3 @@ OWL_FILTER='helloworld'
 OWL_FILTERS='helloworld'
 OWL_FILTER_AA='helloworld'
 OWL_FILTER_AAA='helloworld'
-
-#### MONGO DB ####
-MONGO=localhost
-MONGO_PORT=27017
-MONGO_COLLECTION=flow
-MONGO_INITDB_ROOT_USERNAME=admin
-MONGO_INITDB_ROOT_PASSWORD=password
-MONGO_INITDB_DATABASE=admin

@@ -2,7 +2,7 @@ import puppeteer from 'puppeteer';
 import 'dotenv/config';
 
 import { modifier, splitData } from 'modifiers/modifier';
-import { Environment } from 'modifiers/enums';
+import { Environment, MessageType } from 'modifiers/enums';
 import { sendMessage } from 'messageHandler';
 import {
   mode,
@@ -15,11 +15,12 @@ import {
   owlFilterAAA,
   owlFilters,
   timeout,
+  launchArgs,
 } from 'watcherConstants';
 
 const flowWatcher = () => {
   // Get this working inside a container with args
-  const puppeteerLaunchArgs = ['--disable-gpu', '--disable-dev-shm-usage', '--disable-setuid-sandbox', '--no-sandbox'];
+  const puppeteerLaunchArgs = launchArgs;
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const launcher = (async () => {
@@ -49,7 +50,7 @@ const flowWatcher = () => {
       }
 
       await page.exposeFunction('puppeteerMutation', (rawData: string) => {
-        void sendMessage(modifier(splitData(rawData)));
+        void sendMessage(modifier(MessageType.FLOW, splitData(rawData)));
       });
 
       await page.evaluate(
