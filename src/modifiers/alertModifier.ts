@@ -8,10 +8,10 @@ const modifyAlert = (data: string[]) => {
       symbol: data[0],
       time: data[1],
       expiration: data[2],
-      strike: data[3],
+      strike: parseFloat(data[3]),
       position: data[4],
       sentiment: data[5].split('_')[1],
-      alertPrice: data[6],
+      alertPrice: parseFloat(data[6]),
     }),
   ) as Alert;
 };
