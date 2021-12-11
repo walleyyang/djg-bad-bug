@@ -53,7 +53,6 @@ const flowWatcher = () => {
         await page.waitForTimeout(timeout);
         await page.click(htmlOptionsFilterAA);
         await page.click(htmlOptionsFilterAAA);
-        // // eslint-disable-next-line @typescript-eslint/no-unsafe-call
         const filtersBtn = await page.$x(htmlOptionsFilterSubmitBtn);
         await filtersBtn[0].click();
       }
