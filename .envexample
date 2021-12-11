@@ -3,7 +3,7 @@ BB_PORT=8084
 DH_FLOW_URL=http://localhost:8082/flow
 DH_ALERT_URL=http://localhost:8082/alert
 
-BB_HEADLESS=false
+BB_HEADLESS=true
 # Production
 # BB_MODE=PROD
 # BB_URL=''
