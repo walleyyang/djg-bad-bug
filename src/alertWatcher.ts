@@ -4,8 +4,22 @@ import 'dotenv/config';
 import { modifier, splitData } from 'modifiers/modifier';
 import { Environment, MessageType } from 'modifiers/enums';
 import { sendMessage } from 'messageHandler';
-import { mode, urlAlerts, username, password, owlAlert, owlAlertBtn, timeout, launchArgs } from 'watcherConstants';
-
+import {
+  mode,
+  headless,
+  url,
+  username,
+  password,
+  alertError,
+  htmlEmail,
+  htmlPassword,
+  htmlLoginBtn,
+  htmlOptionsMenu,
+  htmlOptionsAlert,
+  htmlOptionsAlertBtn,
+  timeout,
+  launchArgs,
+} from 'watcherConstants';
 const alertWatcher = () => {
   // Get this working inside a container with args
   const puppeteerLaunchArgs = launchArgs;
@@ -15,6 +29,7 @@ const alertWatcher = () => {
     try {
       const browser = await puppeteer.launch({
         args: puppeteerLaunchArgs,
+        headless: headless,
       });
       const page = await browser.newPage();
 
@@ -23,17 +38,17 @@ const alertWatcher = () => {
       // TODO: get initial persisted alerts
       const alerts: string[] = [];
 
-      await page.goto(urlAlerts);
+      await page.goto(url);
 
       if (mode === Environment.PROD) {
-        await page.type('#Email', username);
-        await page.type('#Password', password);
+        await page.type(htmlEmail, username);
+        await page.type(htmlPassword, password);
 
-        await Promise.all([page.waitForNavigation(), page.click('#loginform > div:nth-child(6) > div > button')]);
+        await Promise.all([page.waitForNavigation(), page.click(htmlLoginBtn)]);
 
-        await page.click('#menuItemOptions');
+        await page.click(htmlOptionsMenu);
         await page.waitForTimeout(timeout);
-        await page.click(owlAlertBtn);
+        await page.click(htmlOptionsAlertBtn);
       }
 
       await page.exposeFunction('puppeteerMutation', (rawData: string[]) => {
@@ -51,8 +66,8 @@ const alertWatcher = () => {
       });
 
       await page.evaluate(
-        ({ owlAlert }) => {
-          const alertTarget = document.querySelector(owlAlert) as HTMLElement;
+        ({ htmlOptionsAlert }) => {
+          const alertTarget = document.querySelector(htmlOptionsAlert) as HTMLElement;
 
           // Had issues with mutation observer, browser tabs, and elements that updated with dynamic data.
           // So we will just check it every so often
@@ -97,10 +112,10 @@ const alertWatcher = () => {
             puppeteerMutation(formattedRawData);
           }, 1000);
         },
-        { owlAlert },
+        { htmlOptionsAlert },
       );
     } catch (error) {
-      console.log('DJG Bad Bug alert watch error: ');
+      console.log(alertError);
       console.log(error);
     }
   })();

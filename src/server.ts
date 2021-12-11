@@ -3,10 +3,9 @@ import 'dotenv/config';
 
 import { flowWatcher } from 'flowWatcher';
 import { alertWatcher } from 'alertWatcher';
+import { port } from 'watcherConstants';
 
 const createServer = () => {
-  const port = process.env.BAD_BUG_PORT || '';
-
   const app = express();
 
   return app.listen(port, () => {

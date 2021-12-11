@@ -3,16 +3,14 @@ import 'dotenv/config';
 
 import { MessageType } from 'modifiers/enums';
 import { Flow, Alert } from 'modifiers/messageModel';
-
-const flowUrl = process.env.DATA_HANDLER_FLOW_URL || '';
-const alertUrl = process.env.DATA_HANDLER_ALERT_URL || '';
+import { flowUrl, alertUrl, sendMessageError } from 'watcherConstants';
 
 const sendMessage = async (message: Flow | Alert) => {
   const url = message.messageType === MessageType.FLOW ? flowUrl : alertUrl;
   try {
     await axios.post(url, message);
   } catch (error) {
-    console.log('DJG Bad Bug send message error: ');
+    console.log(sendMessageError);
     console.log(error);
   }
 };

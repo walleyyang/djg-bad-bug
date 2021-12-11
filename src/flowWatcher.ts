@@ -6,14 +6,20 @@ import { Environment, MessageType } from 'modifiers/enums';
 import { sendMessage } from 'messageHandler';
 import {
   mode,
+  headless,
   url,
   username,
   password,
-  owlFlow,
-  owlFilter,
-  owlFilterAA,
-  owlFilterAAA,
-  owlFilters,
+  flowError,
+  htmlEmail,
+  htmlPassword,
+  htmlLoginBtn,
+  htmlOptionsMenu,
+  htmlOptionsFlowBody,
+  htmlOptionsFilter,
+  htmlOptionsFilterAA,
+  htmlOptionsFilterAAA,
+  htmlOptionsFilterSubmitBtn,
   timeout,
   launchArgs,
 } from 'watcherConstants';
@@ -27,6 +33,7 @@ const flowWatcher = () => {
     try {
       const browser = await puppeteer.launch({
         args: puppeteerLaunchArgs,
+        headless: headless,
       });
       const page = await browser.newPage();
 
@@ -36,17 +43,19 @@ const flowWatcher = () => {
       await page.goto(url);
 
       if (mode === Environment.PROD) {
-        await page.type('#Email', username);
-        await page.type('#Password', password);
+        await page.type(htmlEmail, username);
+        await page.type(htmlPassword, password);
 
-        await Promise.all([page.waitForNavigation(), page.click('#loginform > div:nth-child(6) > div > button')]);
+        await Promise.all([page.waitForNavigation(), page.click(htmlLoginBtn)]);
 
-        await page.click('#menuItemOptions');
-        await page.click(owlFilter);
+        await page.click(htmlOptionsMenu);
+        await page.click(htmlOptionsFilter);
         await page.waitForTimeout(timeout);
-        await page.click(owlFilterAA);
-        await page.click(owlFilterAAA);
-        await page.click(owlFilters);
+        await page.click(htmlOptionsFilterAA);
+        await page.click(htmlOptionsFilterAAA);
+        // // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+        const filtersBtn = await page.$x(htmlOptionsFilterSubmitBtn);
+        await filtersBtn[0].click();
       }
 
       await page.exposeFunction('puppeteerMutation', (rawData: string) => {
@@ -54,8 +63,8 @@ const flowWatcher = () => {
       });
 
       await page.evaluate(
-        ({ owlFlow }) => {
-          const flowTarget = document.querySelector(owlFlow) as HTMLElement;
+        ({ htmlOptionsFlowBody }) => {
+          const flowTarget = document.querySelector(htmlOptionsFlowBody) as HTMLElement;
 
           const observer = new MutationObserver((mutations) => {
             for (const mutation of mutations) {
@@ -69,10 +78,10 @@ const flowWatcher = () => {
             childList: true,
           });
         },
-        { owlFlow },
+        { htmlOptionsFlowBody },
       );
     } catch (error) {
-      console.log('DJG Bad Bug flow watch error: ');
+      console.log(flowError);
       console.log(error);
     }
   })();
