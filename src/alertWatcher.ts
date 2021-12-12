@@ -47,8 +47,9 @@ const alertWatcher = () => {
 
         await page.click(htmlOptionsMenu);
         await page.waitForTimeout(timeout);
-        await page.click(htmlOptionsAlertBtn);
       }
+
+      await page.click(htmlOptionsAlertBtn);
 
       await page.exposeFunction('puppeteerMutation', (rawData: string[]) => {
         const alertDataIdIndex = 10;
