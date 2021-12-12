@@ -1,5 +1,4 @@
 import axios from 'axios';
-import 'dotenv/config';
 
 import { MessageType } from 'modifiers/enums';
 import { Flow, Alert } from 'modifiers/messageModel';

@@ -1,5 +1,4 @@
 import puppeteer from 'puppeteer';
-import 'dotenv/config';
 
 import { modifier, splitData } from 'modifiers/modifier';
 import { Environment, MessageType } from 'modifiers/enums';

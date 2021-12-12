@@ -1,5 +1,4 @@
 import express from 'express';
-import 'dotenv/config';
 
 import { flowWatcher } from 'flowWatcher';
 import { alertWatcher } from 'alertWatcher';

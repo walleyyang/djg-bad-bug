@@ -1,3 +1,5 @@
+import 'dotenv/config';
+
 export const port = process.env.BB_PORT || '';
 export const mode = process.env.BB_MODE || '';
 export const url = process.env.BB_URL || '';
