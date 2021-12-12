@@ -19,6 +19,7 @@ import {
   htmlOptionsFilter,
   htmlOptionsFilterAA,
   htmlOptionsFilterAAA,
+  htmlOptionsFilterETF,
   htmlOptionsFilterSubmitBtn,
   timeout,
   launchArgs,
@@ -53,6 +54,7 @@ const flowWatcher = () => {
         await page.waitForTimeout(timeout);
         await page.click(htmlOptionsFilterAA);
         await page.click(htmlOptionsFilterAAA);
+        await page.click(htmlOptionsFilterETF);
         const filtersBtn = await page.$x(htmlOptionsFilterSubmitBtn);
         await filtersBtn[0].click();
       }

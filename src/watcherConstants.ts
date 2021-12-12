@@ -18,6 +18,7 @@ export const htmlOptionsAlertBtn = process.env.BB_HTML_OPTIONS_ALERT_BTN || '';
 export const htmlOptionsFilter = process.env.BB_HTML_OPTIONS_FILTER || '';
 export const htmlOptionsFilterAA = process.env.BB_HTML_OPTIONS_FILTER_AA || '';
 export const htmlOptionsFilterAAA = process.env.BB_HTML_OPTIONS_FILTER_AAA || '';
+export const htmlOptionsFilterETF = process.env.BB_HTML_OPTIONS_FILTER_ETF || '';
 export const htmlOptionsFilterSubmitBtn = process.env.BB_HTML_OPTIONS_FILTER_SUBMIT_BTN || '';
 export const timeout = 3000;
 
